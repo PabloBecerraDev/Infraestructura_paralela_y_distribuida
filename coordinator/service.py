@@ -22,8 +22,14 @@ def run_strategy():
     predictions = []
     for i in range(180, len(daily_df)):
         window = daily_df['log_ret'].iloc[i-180:i].dropna().tolist()
-        res = requests.post("http://garch_model:8001/GARCHService", json={"returns": window}).json()
-        predictions.append(res["variance_forecast"])
+        res = requests.post("http://garch_model:8001/predict", json={"returns": window}).json()
+
+        if "variance_forecast" in res:
+            predictions.append(res["variance_forecast"])
+        else:
+            print(f"⚠️ GARCH error en índice {i}: {res}")
+            predictions.append(None)
+
     daily_df = daily_df.iloc[-len(predictions):].copy()
     daily_df['predictions'] = predictions
 

@@ -1,36 +1,40 @@
-import ray
-from ray import serve
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import List
-import pandas as pd
+import ray
+from ray import serve
 from arch import arch_model
+import numpy as np
+import time
 
-# Inicializa Ray y Ray Serve
-ray.init()
 app = FastAPI()
-serve.start(detached=True)
 
-class ReturnInput(BaseModel):
-    returns: List[float]
+class InputData(BaseModel):
+    returns: list
 
 @serve.deployment
+@serve.ingress(app)
 class GARCHService:
     def __init__(self):
         pass
 
-    async def __call__(self, request):
-        body = await request.json()
-        returns = pd.Series(body["returns"])
+    @app.get("/health")
+    async def health(self):
+        return {"status": "garch model running"}
+
+    @app.post("/predict")
+    async def predict(self, data: InputData):
+        returns = np.array(data.returns)
+        if len(returns) < 10:
+            return {"error": "Insufficient data points"}
         model = arch_model(returns, p=1, q=3)
-        res = model.fit(update_freq=5, disp="off")
-        forecast = res.forecast(horizon=1).variance.iloc[-1, 0]
-        return {"variance_forecast": forecast}
+        model_fitted = model.fit(disp="off")
+        forecast = model_fitted.forecast(horizon=1)
+        return {"variance_forecast": forecast.variance.values[-1][0]}
 
-# Montar el endpoint en Serve
-GARCHService.deploy()
+if __name__ == "__main__":
+    ray.init()
+    serve.start(detached=True, http_options={"host": "0.0.0.0", "port": 8001})
+    serve.run(GARCHService.bind(), name="default")
 
-# Exponer FastAPI para verificar si está corriendo
-@app.get("/health")
-def health_check():
-    return {"status": "garch model running"}
+    while True:
+        time.sleep(3600)
