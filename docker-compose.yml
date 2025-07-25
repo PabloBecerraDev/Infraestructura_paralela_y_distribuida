@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  data_ingestor:
+    build: ./data_ingestor
+    container_name: data_ingestor
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data_ingestor/data:/app/data
+
+  garch_model:
+    build: ./garch_model
+    container_name: garch_model
+    ports:
+      - "8001:8001"
+    depends_on:
+      - data_ingestor
+
+  signal_generator:
+    build: ./signal_generator
+    container_name: signal_generator
+    ports:
+      - "8002:8002"
+    depends_on:
+      - garch_model
+
+  return_calculator:
+    build: ./return_calculator
+    container_name: return_calculator
+    ports:
+      - "8003:8003"
+    depends_on:
+      - signal_generator
+
+  coordinator:
+    build: ./coordinator
+    container_name: coordinator
+    ports:
+      - "8004:8004"
+    depends_on:
+      - return_calculator

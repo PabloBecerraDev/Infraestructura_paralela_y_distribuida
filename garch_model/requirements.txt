@@ -1,0 +1,5 @@
+ray[serve]
+fastapi
+uvicorn
+pandas
+arch
