@@ -1,0 +1,25 @@
+services:
+  servicio_get_data:
+    build: ./get_data_microservice
+    container_name: getDataContainer
+    ports: 
+      - "5000:5000"
+    networks:
+      - red_microservicios
+  
+
+  servicio_process_data:
+    build: ./Process_data_microservice
+    container_name: processDataMicrosevice
+    ports: 
+      - "5001:5001"
+    networks:
+      - red_microservicios
+    depends_on:
+      - servicio_get_data
+
+
+networks:
+  red_microservicios:
+    driver: bridge
+  
