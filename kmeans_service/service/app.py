@@ -92,7 +92,7 @@ def getData():
 
  
         json_data = data.reset_index().to_json(orient="records")
-        return Response(data, mimetype='application/json')
+        return Response(json_data, mimetype='application/json')
 
     
     except requests.RequestException as e:

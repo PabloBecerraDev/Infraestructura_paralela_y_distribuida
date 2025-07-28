@@ -13,10 +13,6 @@ app = Flask(__name__)
 
 
 
-
-
-
-
 @app.route('/getResult', methods=["POST"])
 def getResultService():
     try:
@@ -78,20 +74,18 @@ def getFiltered(df):
 
 
 def optimize_weights(prices, lower_bound=0):
-
-    returns = expected_returns.mean_historical_return(prices=prices,
-                                                      frequency=252)
-
-    cov = risk_models.sample_cov(prices=prices,
-                                 frequency=252)
-
+    """
+    Optimiza los pesos usando Maximum Sharpe Ratio
+    """
+    returns = expected_returns.mean_historical_return(prices=prices, frequency=252)
+    cov = risk_models.sample_cov(prices=prices, frequency=252)
+    
     ef = EfficientFrontier(expected_returns=returns,
                            cov_matrix=cov,
-                           weight_bounds=(lower_bound, .1),
+                           weight_bounds=(lower_bound, 0.1),
                            solver='SCS')
-
+    
     weights = ef.max_sharpe()
-
     return ef.clean_weights()
 
 
