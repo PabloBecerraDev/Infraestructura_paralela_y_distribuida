@@ -18,6 +18,28 @@ services:
     depends_on:
       - servicio_get_data
 
+  
+  servicio_kmeans:
+    build: ./kmeans_service
+    container_name: kmenasMicroservice
+    ports: 
+      - "5002:5002"
+    networks:
+      - red_microservicios
+    depends_on:
+      - servicio_process_data
+
+  
+  servicio_get_result:
+    build: ./result_microservice
+    container_name: getResultMicrosevice
+    ports: 
+      - "5003:5003"
+    networks:
+      - red_microservicios
+    depends_on:
+      - servicio_kmeans
+
 
 networks:
   red_microservicios:
