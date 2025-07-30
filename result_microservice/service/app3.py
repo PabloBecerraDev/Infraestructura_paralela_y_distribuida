@@ -7,12 +7,8 @@ import numpy as np
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models
 from pypfopt import expected_returns
-import datetime as dt  #agregar esto
-import matplotlib.ticker as mtick # y esto tambien
-import matplotlib.pyplot as plt
 import time
-import io
-import base64
+import matplotlib.ticker as mtick
 
 
 
@@ -34,7 +30,7 @@ def status():
 def getResultService():
     """Endpoint que procesa los datos usando paralelización con Ray"""
     try:
-        response = requests.post("http://localhost:5002/Kmeans-getData")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getData")
         response.raise_for_status()
 
         data = pd.DataFrame(response.json())
@@ -48,80 +44,16 @@ def getResultService():
             )
 
         # Usar versión paralela
-        portafolio_df = processPortfolioParallel(data)
-
-        # Descargar datos
-        spy = yf.download(tickers='SPY', start='2015-01-01', end=dt.date.today())
-
-        # Verificar si el DataFrame está vacío
-        if spy.empty:
-            raise ValueError("No se pudieron descargar datos de SPY")
-
-        # Verificar qué columna usar (puede ser 'Adj Close' o ('Adj Close', 'SPY'))
-        if 'Adj Close' in spy.columns:
-            spy_close = spy[['Adj Close']]  # ← Doble corchete para mantener DataFrame
-        elif ('Adj Close', 'SPY') in spy.columns:  # MultiIndex
-            spy_close = spy[[('Adj Close', 'SPY')]]  # ← Doble corchete
-        else:
-            # Usar la columna Close si Adj Close no existe
-            spy_close = spy[['Close']]  # ← Doble corchete
-
-        # Calcular retornos
-        spy_ret = np.log(spy_close).diff().dropna()
-        spy_ret.columns = ['SPY Buy&Hold']
-
-        # Merge con portfolio_df
-        portafolio_df = portafolio_df.merge(spy_ret, left_index=True, right_index=True)
+        result = processPortfolioParallel(data)
 
 
-        # GENERAR GRÁFICO
-        def generate_portfolio_chart(portfolio_df):
-            """Genera el gráfico del portafolio y lo retorna como base64"""
-            plt.style.use('ggplot')
-            
-            # Calcular retornos acumulativos
-            portfolio_cumulative_return = np.exp(np.log1p(portfolio_df).cumsum()) - 1
-            
-            # Crear el gráfico
-            fig, ax = plt.subplots(figsize=(16, 6))
-            
-            # Filtrar datos hasta 2023-09-29 si existen
-            try:
-                portfolio_cumulative_return[:'2023-09-29'].plot(ax=ax)
-            except:
-                # Si no hay datos hasta esa fecha, graficar todo
-                portfolio_cumulative_return.plot(ax=ax)
-            
-            plt.title('Unsupervised Learning Trading Strategy Returns Over Time')
-            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1))
-            plt.ylabel('Return')
-            
-            # Convertir a base64
-            buffer = io.BytesIO()
-            plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
-            buffer.seek(0)
-            
-            # Codificar en base64
-            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            plt.close(fig)  # Liberar memoria
-            
-            return image_base64
 
-        # Generar gráfico
-        chart_base64 = generate_portfolio_chart(portafolio_df)
 
-        print(portafolio_df)
 
-        # Preparar respuesta con datos y gráfico
-        portfolio_json = portafolio_df.reset_index().to_dict(orient="records")
-        
-        response_data = {
-            "portfolio_data": portfolio_json,
-            "chart_image": chart_base64,
-            "chart_url": f"data:image/png;base64,{chart_base64}"
-        }
+        print(result)
 
-        return jsonify(response_data)
+        json_data = result.reset_index().to_json(orient="records")
+        return Response(json_data, mimetype='application/json')
 
     except requests.RequestException as e:
         return jsonify({'error': str(e)}), 500
@@ -131,7 +63,7 @@ def getResultService():
 def getResultSequential():
     """Endpoint que procesa los datos de manera secuencial"""
     try:
-        response = requests.post("http://localhost:5002/Kmeans-getDataSequential")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getDataSequential")
         response.raise_for_status()
 
         data = pd.DataFrame(response.json())
@@ -161,7 +93,7 @@ def comparePerformance():
     """Endpoint que compara el tiempo de procesamiento entre versión paralela y secuencial"""
     try:
         # Obtener datos una sola vez para ambas comparaciones
-        response = requests.post("http://localhost:5002/Kmeans-getData")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getData")
         response.raise_for_status()
 
         # Preparar datos base

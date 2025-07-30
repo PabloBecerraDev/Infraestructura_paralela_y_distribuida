@@ -24,7 +24,7 @@ def status():
 @app.route('/getData', methods=["POST"])
 def getDataByotherService():
     try:
-        response = requests.post("http://localhost:5000/sp500_data")
+        response = requests.post("http://servicio_get_data:5000/sp500_data")
         response.raise_for_status()
 
         # Convertir el JSON a DataFrame
@@ -67,7 +67,7 @@ def getDataByotherService():
 def getDataSequential():
     """Endpoint que procesa los datos de manera secuencial (no paralela)"""
     try:
-        response = requests.post("http://localhost:5000/sp500_data")
+        response = requests.post("http://servicio_get_data:5000/sp500_data")
         response.raise_for_status()
 
         # Convertir el JSON a DataFrame
@@ -111,7 +111,7 @@ def getDataSequential():
 def comparePerformance():
     """Endpoint que compara el tiempo de procesamiento entre versión paralela y secuencial"""
     try:
-        response = requests.post("http://localhost:5000/sp500_data")
+        response = requests.post("http://servicio_get_data:5000/sp500_data")
         response.raise_for_status()
 
         # Convertir el JSON a DataFrame

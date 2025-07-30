@@ -30,7 +30,7 @@ def getData():
     """Endpoint que procesa los datos usando paralelización con Ray"""
     try:
         # Llamada al microservicio 2 (versión paralela)
-        response = requests.post("http://localhost:5001/getData")
+        response = requests.post("http://servicio_process_data:5001/getData")
         response.raise_for_status()
 
         # Cargar el JSON como DataFrame
@@ -65,7 +65,7 @@ def getDataSequential():
     """Endpoint que procesa los datos de manera secuencial (no paralela)"""
     try:
         # Llamada al microservicio 2 (usando la versión secuencial)
-        response = requests.post("http://localhost:5001/getDataSequential")
+        response = requests.post("http://servicio_process_data:5001/getDataSequential")
         response.raise_for_status()
 
         # Cargar el JSON como DataFrame
@@ -100,7 +100,7 @@ def comparePerformance():
     """Endpoint que compara el tiempo de procesamiento entre versión paralela y secuencial"""
     try:
         # Obtener datos una sola vez para ambas comparaciones
-        response = requests.post("http://localhost:5001/getData")
+        response = requests.post("http://servicio_process_data:5001/getData")
         response.raise_for_status()
 
         # Preparar datos base
