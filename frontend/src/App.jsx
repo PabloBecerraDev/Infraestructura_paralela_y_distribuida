@@ -3,7 +3,6 @@ import DataProcessor from './components/DataProcessor'
 import ClusterViewer from './components/ClusterViewer'
 import PortfolioViewer from './components/PortfolioViewer'
 import MarketViewer from './components/MarketViewer'
-import SentimentViewer from './components/SentimentViewer'
 
 function App() {
   return (
@@ -13,7 +12,6 @@ function App() {
       <ClusterViewer />
       <PortfolioViewer />
       <MarketViewer />
-      <SentimentViewer />
     </div>
   )
 }
