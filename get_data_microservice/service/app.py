@@ -3,11 +3,13 @@ import pandas as pd
 import yfinance as yf
 import ray
 import math
+from flask_cors import CORS
 
 # Inicializar Ray
 ray.init(ignore_reinit_error=True)
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuración para manejar respuestas grandes
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB

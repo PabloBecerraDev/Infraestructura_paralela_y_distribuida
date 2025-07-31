@@ -5,14 +5,15 @@ import pandas_ta
 import requests
 import time
 from flask import Flask, jsonify, Response
+from flask_cors import CORS
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/status', methods=["GET"])
 def status():
-    """Endpoint simple de status"""
+    """Endpoint simple de status""" 
     return jsonify({
         "status": "OK",
         "service": "Financial Data Processor",

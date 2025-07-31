@@ -39,6 +39,29 @@ services:
       - red_microservicios
     depends_on:
       - servicio_kmeans
+  
+  gateway:
+    build: ./Gateway
+    container_name: apiGateway
+    ports:
+      - "5050:5000"
+    networks:
+      - red_microservicios
+    depends_on:
+      - servicio_get_data
+      - servicio_process_data
+      - servicio_kmeans
+      - servicio_get_result
+
+  frontend:
+    build: ./frontend
+    container_name: frontendContainer
+    ports:
+      - "3000:80"
+    networks:
+      - red_microservicios
+    depends_on:
+      - gateway
 
 
 networks:

@@ -9,10 +9,11 @@ import statsmodels.api as sm
 import requests 
 import time
 from flask import Flask, jsonify, Response
+from flask_cors import CORS
 
 
 app = Flask(__name__)
-
+CORS(app)   
 
 @app.route('/status', methods=["GET"])
 def status():
