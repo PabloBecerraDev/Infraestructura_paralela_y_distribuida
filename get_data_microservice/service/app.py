@@ -3,16 +3,18 @@ import pandas as pd
 import yfinance as yf
 import ray
 import math
+from flask_cors import CORS
 
 # Inicializar Ray
 ray.init(ignore_reinit_error=True)
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuración para manejar respuestas grandes
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB
 app.config['JSON_SORT_KEYS'] = False
-
+   
 @ray.remote
 def descargar_chunk_datos(tickers_chunk, start_date, end_date):
     """
@@ -65,8 +67,12 @@ def get_sp500_data():
 
         # esto es un dataframe, es la primer tabla de la pagina
         sp500 = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0] 
+        print("Tabla de Wikipedia descargada:")
+        print(sp500.head())
         sp500['Symbol'] = sp500['Symbol'].str.replace('.', '-') #en toda la columna de Symbol reemplaza . por - 
-        symbols_list = sp500['Symbol'].unique().tolist() #es una lista nica de los simbolos 
+        #symbols_list = sp500['Symbol'].unique().tolist() #es una lista nica de los simbolos 
+        symbols_list = ['AAPL', 'MSFT', 'GOOGL', 'AMZN']
+        print(f"Símbolos obtenidos: {symbols_list[:5]}")
 
         # this loop remove the repeated symbol of the symbol_list
         symbols_to_remove = ['SW', 'SOLV', 'VLTO', 'GEV']

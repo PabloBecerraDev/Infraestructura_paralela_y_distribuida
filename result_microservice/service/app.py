@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 import time
 import io
 import base64
-
+from flask_cors import CORS
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/status', methods=["GET"])
 def status():
@@ -34,7 +34,7 @@ def status():
 def getResultService():
     """Endpoint que procesa los datos usando paralelización con Ray"""
     try:
-        response = requests.post("http://localhost:5002/Kmeans-getData")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getData")
         response.raise_for_status()
 
         data = pd.DataFrame(response.json())
@@ -131,7 +131,7 @@ def getResultService():
 def getResultSequential():
     """Endpoint que procesa los datos de manera secuencial"""
     try:
-        response = requests.post("http://localhost:5002/Kmeans-getDataSequential")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getDataSequential")
         response.raise_for_status()
 
         data = pd.DataFrame(response.json())
@@ -161,7 +161,7 @@ def comparePerformance():
     """Endpoint que compara el tiempo de procesamiento entre versión paralela y secuencial"""
     try:
         # Obtener datos una sola vez para ambas comparaciones
-        response = requests.post("http://localhost:5002/Kmeans-getData")
+        response = requests.post("http://servicio_kmeans:5002/Kmeans-getData")
         response.raise_for_status()
 
         # Preparar datos base

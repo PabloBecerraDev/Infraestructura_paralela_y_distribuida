@@ -5,14 +5,15 @@ import pandas_ta
 import requests
 import time
 from flask import Flask, jsonify, Response
+from flask_cors import CORS
 
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route('/status', methods=["GET"])
 def status():
-    """Endpoint simple de status"""
+    """Endpoint simple de status""" 
     return jsonify({
         "status": "OK",
         "service": "Financial Data Processor",
@@ -203,7 +204,7 @@ def calculateIndicatorsSequential(df):
                             length=14)
         return atr.sub(atr.mean()).div(atr.std())
 
-    df['atr'] = df.groupby(level=1, group_keys=False).apply(compute_atr)
+    df['atr'] = df_block.groupby(level=1, group_keys=False).apply(compute_atr).droplevel(0)
 
     def compute_macd(close):
         macd = pandas_ta.macd(close=close, length=20).iloc[:,0]
@@ -245,13 +246,18 @@ def process_block(df_block):
     df_block['bb_high'] = df_block.groupby(level=1)['adj close'].transform(lambda x: pandas_ta.bbands(close=np.log1p(x), length=20).iloc[:,2])
 
     def compute_atr(stock_data):
-        atr = pandas_ta.atr(high=stock_data['high'],
-                            low=stock_data['low'],
-                            close=stock_data['close'],
-                            length=14)
-        return atr.sub(atr.mean()).div(atr.std())
+        atr = pandas_ta.atr(
+            high=stock_data['high'],
+            low=stock_data['low'],
+            close=stock_data['close'],
+            length=14
+        )
+        print("ATR shape:", atr.shape)
+        return atr.sub(atr.mean()).div(atr.std())  # Esto es una Serie
 
-    df_block['atr'] = df_block.groupby(level=1, group_keys=False).apply(compute_atr)
+
+    df_block['atr'] = df_block.groupby(level=1)['high'].transform(lambda x: compute_atr(df_block.loc[x.index]))
+
 
     def compute_macd(close):
         macd = pandas_ta.macd(close=close, length=20).iloc[:,0]
