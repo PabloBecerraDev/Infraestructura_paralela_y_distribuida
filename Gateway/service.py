@@ -1,7 +1,9 @@
 from flask import Flask, request, Response, jsonify
 import requests
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 MICROSERVICES = {
     "process": "http://servicio_process_data:5001/getData",

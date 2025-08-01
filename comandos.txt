@@ -1,0 +1,5 @@
+git clone "https://github.com/PabloBecerraDev/Infraestructura_paralela_y_distribuida.git"
+sudo docker compose up --build
+
+Pagina web:
+http://localhost:3000/
