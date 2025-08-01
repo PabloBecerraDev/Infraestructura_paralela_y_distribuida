@@ -8,6 +8,14 @@ Sistema distribuido de microservicios para el procesamiento y análisis de datos
 
 ```mermaid
 graph TB
+    subgraph "Frontend"
+        FE[React + Vite<br/>Puerto 3000]
+    end
+
+    subgraph "Gateway API"
+        GW[Flask Gateway<br/>Puerto 5050]
+    end
+
     subgraph "Data Layer"
         MS0[ Data Fetcher<br/>Port 5000<br/>S&P 500 Data Download]
     end
@@ -20,7 +28,9 @@ graph TB
     subgraph "Strategy Layer"
         MS3[ Portfolio Optimizer<br/>Port 5003<br/>Modern Portfolio Theory]
     end
-    
+
+    FE --> GW
+    GW --> MS0
     MS0 --> MS1
     MS1 --> MS2
     MS2 --> MS3
@@ -30,10 +40,12 @@ graph TB
 
 ##  Flujo de Datos
 
-1. **Data Fetcher** → Descarga datos históricos del S&P 500 desde Yahoo Finance
-2. **Technical Indicators** → Calcula indicadores técnicos (RSI, Bollinger Bands, MACD, etc.)
-3. **ML Clustering** → Aplica K-means clustering y calcula factores Fama-French
-4. **Portfolio Optimizer** → Optimiza portafolios usando Modern Portfolio Theory
+1. **Frontend** → Interfaz web desarrollada en React + Vite que permite al usuario interactuar con el sistema de análisis financiero de forma visual e intuitiva.
+2. **API Gateway** → Microservicio en Flask (puerto 5050) que centraliza y redirige las peticiones del frontend hacia los microservicios adecuados.
+3. **Data Fetcher** → Descarga datos históricos del S&P 500 desde Yahoo Finance
+4. **Technical Indicators** → Calcula indicadores técnicos (RSI, Bollinger Bands, MACD, etc.)
+5. **ML Clustering** → Aplica K-means clustering y calcula factores Fama-French
+6. **Portfolio Optimizer** → Optimiza portafolios usando Modern Portfolio Theory
 
 ##  Stack Tecnológico
 
@@ -202,6 +214,7 @@ curl -X GET http://localhost:5000/status
 curl -X GET http://localhost:5001/status
 curl -X GET http://localhost:5002/status
 curl -X GET http://localhost:5003/status
+curl -X GET http://localhost:5050/api/status
 ```
 
 ---
